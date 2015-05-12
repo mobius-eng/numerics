@@ -1,14 +1,22 @@
-(ns numerics.criteria
-  (:refer-clojure))
+;
+; Copyright (c) 2015 Alexey Cherkaev.
+; This file is licensed under Lesser General Public License v.3
+; The text of the license can be found at http://www.gnu.org/licenses/lgpl-3.0.txt
+;
 
-(defn continue [x] {:status ::continue :value x})
-(defn failed [x] {:status ::failed :value x})
-(defn finished [x] {:status ::finished :value x})
+(ns numerics.criteria
+  (:refer-clojure)
+  (:import clojure.lang.Keyword))
+
+(defrecord Criteria [^Keyword status value])
+
+(defn continue [x] (->Criteria ::continue x))
+(defn failed [x] (->Criteria ::failed x))
+(defn finished [x] (->Criteria ::finished x))
 
 (defn continue? [x] (= (:status x) ::continue))
 (defn failed? [x] (= (:status x) ::failed))
 (defn finished? [x] (= (:status x) ::finished))
-
 
 (defn value-finished-criteria [is-finished?]
   (fn [_]
