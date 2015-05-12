@@ -1,7 +1,14 @@
+;
+; Copyright (c) 2015 Alexey Cherkaev.
+; This file is licensed under Lesser General Public License v.3
+; The text of the license can be found at http://www.gnu.org/licenses/lgpl-3.0.txt
+;
+
 (ns numerics.interpolation
   (:refer-clojure :exclude [+ - * / ==])
   (:require [clojure.core.matrix :refer :all]
-            [clojure.core.matrix.operators :refer :all]))
+            [clojure.core.matrix.operators :refer :all])
+  (:import numerics.Polint))
 
 (defn lagrange-polint [points]
   (let [xs (mapv first points)
@@ -28,40 +35,23 @@
               (map-indexed (fn [i dn] (* (numerator-f i x) dn))
                            xs-denom)))))
 
+(defn find-nearest-index
+  ([v x [lower upper]]
+   (if (== (- upper lower) 1)
+     (if (< (abs (- x (v upper))) (abs (- x (v lower))))
+       upper
+       lower)
+     (let [middle (quot (+ lower upper) 2)]
+       (cond (< x (v middle)) (recur v x [lower middle])
+             (> x (v middle)) (recur v x [middle upper])
+             :else middle))))
+  ([v x] (find-nearest-index v x [0 (dec (count v))])))
+
 (defn neville-polint
-  "Neville\'s algorithm for polynomial interpolation"
+  "Neville's algorithm for polynomial interpolation.
+  Returns a function of double"
   [points]
-  (let [xa (mapv first points)
-        ya (mapv second points)
-        n  (count xa)]
-    (fn [x]
-      (let [[x-dif x-ind] (reduce-kv (fn [[min-diff ind] i xx]
-                                       (let [diff (abs (- x xx))]
-                                         (if (< diff min-dff)
-                                           [diff i]
-                                           [min-diff ind])))
-                                     xa)]
-        (loop [m 1
-               y (ya (dec x-ind))
-               c ya
-               d ya]
-          (if (== m n)
-            (do-something)
-            (let [[new-c new-d] (loop [i 0
-                   new-c []
-                   new-d []]
-              (if (== i (- n m))
-                [new-c new-d]
-                (let [ho (- (xa i) x)
-                      hp (- (xa (+ i m)) x)
-                      w (- (c (inc i)) (d i))
-                      den (- ho hp)
-                      v (/ w den)]
-                  (recur (inc i) (conj new-c (* hp v)) (conj new-d (* ho v))))))])
-            ))))))
-
-
-
-
-
+  (let [xa (->> points (mapv first) double-array)
+        ya (->> points (mapv second) double-array)]
+    (Polint/neville xa ya)))
 
