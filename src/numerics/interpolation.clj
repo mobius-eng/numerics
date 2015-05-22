@@ -55,3 +55,14 @@
         ya (->> points (mapv second) double-array)]
     (Polint/neville xa ya)))
 
+(defn quadratic
+  "Interpolate with quadratic function given and points and initial drivative"
+  [[t0 u0] [t1 u1] d0]
+  (let [t1-t0 (double (- t1 t0))
+        tt (double (* t1-t0 t1-t0))
+        a  (- (/ (- u1 u0) tt)
+              (/ d0 t1-t0))
+        b (- d0 (* (* 2.0 t0) t0))
+        c (- u0 (* a t0 t0) (* b t0))]
+    (fn [^double t]
+      (+ (* (* t t) a) (* t b) c))))

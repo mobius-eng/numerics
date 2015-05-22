@@ -4,14 +4,14 @@
 ; The text of the license can be found at http://www.gnu.org/licenses/lgpl-3.0.txt
 ;
 
-(ns numerics.lin-operator
+(ns numerics.linear.operator
   (:refer-clojure :exclude [+ - * / ==])
   (:require [numerics.fixed-point :refer :all]
             [clojure.core.matrix :refer :all]
             [clojure.core.matrix.operators :refer :all]
             [clojure.core.matrix.linear :as linear]
-            [numerics.linear :refer :all]
-            [numerics.bicg-stab :as bicg]))
+            [numerics.linear.protocols :refer :all]
+            [numerics.linear.bicg-stab :as bicg]))
 
 (def ^:dynamic *lin-operator-tol* 1.0e-8)
 (def ^:dynamic *lin-operator-max-count* 20)
@@ -35,16 +35,15 @@
                     nil)))
   clojure.core.matrix.protocols.PMatrixAdd
   (matrix-add [m a]
-    (LinOperator. (fn [u] (+ ((.f m) u) (op* a u)))
+    (LinOperator. (fn [u] (+ ((.f m) u) (apply-operator a u)))
                   (fn [u dest]
                     ((.f! m) u dest)
-                    (add! dest (op* a u))
-                    nil)))
+                    (apply-operator-add! a u dest))))
   (matrix-sub [m a]
-    (LinOperator. (fn [u] (- ((.f m) u) (op* a u)))
+    (LinOperator. (fn [u] (- ((.f m) u) (apply-operator a u)))
                   (fn [u dest]
                     ((.f! m) u dest)
-                    (sub! dest (op* a u))
+                    (sub! dest (apply-operator a u))
                     nil)))
   clojure.core.matrix.protocols.PNegation
   (negate [m]
@@ -55,6 +54,7 @@
                     nil)))
   PLinOperator
   (apply-operator [A u] ((.f A) u))
+  PLinOperator!
   (apply-operator! [A u dest] ((.f! A) u dest))
   PInvLinOperator
   (apply-inversed [A u]
@@ -72,4 +72,4 @@
 
 (defn lin-operator [f] (LinOperator. f nil))
 (defn lin-operator-full [f f!] (LinOperator. f f!))
-
+(defn lin-operator? [f] (instance? LinOperator f))

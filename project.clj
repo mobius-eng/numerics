@@ -7,7 +7,8 @@
             [lein-autoexpect "1.4.2"]]
   :dependencies [[org.clojure/clojure "1.6.0"]
                  [net.mikera/core.matrix "0.34.0"]
-                 [net.mikera/vectorz-clj "0.29.0"]]
+                 [net.mikera/vectorz-clj "0.29.0"]
+                 [potemkin "0.3.13"]]
   :profiles {:dev {:dependencies [[expectations "2.0.9"]]}}
   :java-source-paths ["java"]
   :source-paths ["src"]

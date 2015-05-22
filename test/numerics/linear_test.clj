@@ -11,7 +11,7 @@
             [clojure.core.matrix.operators :refer :all]
             [clojure.core.matrix.linear :as linear]
             [numerics.linear :refer :all]
-            [numerics.bicg-stab :as bicg]
+            [numerics.linear.bicg-stab :as bicg]
             [expectations :refer :all]))
 
 (set-current-implementation :vectorz)
@@ -23,9 +23,9 @@
       x (mutable (zero-vector 3))]
   (expect (mmul m v) (op* m v))
   (do
-    (apply-operator! m v x)
+    (op*! x m v)
     (expect (mmul m v) x))
-  (expect (linear/solve m b) (apply-inversed m b)))
+  (expect (linear/solve m b) (op-inv m b)))
 
 ;; Simple BiCGStab
 (let [m (matrix [[1 2 3] [4 5 6] [7 9 9]])

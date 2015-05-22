@@ -18,21 +18,43 @@
 (defn failed? [x] (= (:status x) ::failed))
 (defn finished? [x] (= (:status x) ::finished))
 
-(defn value-finished-criteria [is-finished?]
+(defn value-finished
+  ([is-finished? info]
+   (fn [_]
+     (fn [x]
+       (if (is-finished? x)
+         (if info
+           (update-in (finished x)
+                      [:info]
+                      (fn [prev-info]
+                        (str prev-info "\n" info)))
+           (finished x))
+         (continue x)))))
+  ([is-finished?]
+    (value-finished is-finished? nil)))
+
+(defn value-failed
+  ([is-failed? info]
+   (fn [_]
+     (fn [x]
+       (if (is-failed? x)
+         (if info
+           (update-in (failed x)
+                      [:info]
+                      (fn [prev-info]
+                        (str prev-info "\n" info)))
+           (failed x))
+         (continue x)))))
+  ([is-failed?]
+    (value-failed is-failed? nil)))
+
+(defn log-value [msg-fn]
   (fn [_]
     (fn [x]
-      (if (is-finished? x)
-        (finished x)
-        (continue x)))))
+      (println (msg-fn x))
+      (continue x))))
 
-(defn value-failed-criteria [is-failed?]
-  (fn [_]
-    (fn [x]
-      (if (is-failed? x)
-        (failed x)
-        (continue x)))))
-
-(defn close-enough-criteria [close-enough?]
+(defn close-enough [close-enough?]
   (fn [x0]
     (let [x (atom x0)]
       (fn [y]
@@ -42,16 +64,19 @@
             (reset! x y)
             (continue y)))))))
 
-(defn max-count-criteria [max-count]
+(defn max-count [max-count]
   (fn [_]
     (let [left (atom max-count)]
       (fn [y]
         (swap! left dec)
         (if (or (zero? @left) (neg? @left))
-          (assoc (failed y) :info (format "Exceeded max iteration count %d" max-count))
+          (update-in (failed y)
+                     [:info]
+                     #(str % "\n" (format "Exceeded max iteration count %d"
+                                          max-count)))
           (continue y))))))
 
-(defn combine-criteria [& cs]
+(defn combine [& cs]
   (fn [x0]
     (let [cs-f (map #(% x0) cs)]
       (fn [x]
