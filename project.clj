@@ -1,4 +1,4 @@
-(defproject numerics "0.1.0-SNAPSHOT"
+(defproject numerics "0.0.1-SNAPSHOT"
   :description "Numeric algrithms for Clojure"
   :url "https://github.com/mobius-eng/numerics"
   :license {:name "LGPL3"
