@@ -11,7 +11,8 @@
             [clojure.core.matrix.operators :refer :all]
             [clojure.core.matrix.linear :as linear]
             [numerics.linear.protocols :refer :all]
-            [numerics.linear.bicg-stab :as bicg]))
+            [numerics.linear.bicg-stab :as bicg]
+            [numerics.utils :refer [unless]]))
 
 (def ^:dynamic *lin-operator-tol* 1.0e-8)
 (def ^:dynamic *lin-operator-max-count* 20)
@@ -55,7 +56,15 @@
   PLinOperator
   (apply-operator [A u] ((.f A) u))
   PLinOperator!
-  (apply-operator! [A u dest] ((.f! A) u dest))
+  (apply-operator! [A u dest]
+    (if-let [f! (.f! A)]
+      (f! u dest)
+      (let [v ((.f A) u)
+            n (ecount u)]
+        (loop [i 0]
+          (unless (== i n)
+                  (mset! dest i (mget v i))
+                  (recur ^long (inc i)))))))
   PInvLinOperator
   (apply-inversed [A u]
     (bicg/solve (bicg/simple-criteria *lin-operator-tol*
