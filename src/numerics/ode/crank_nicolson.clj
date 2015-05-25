@@ -36,23 +36,24 @@
     (fsolve *crank-nicolson-solver-criteria* g dg u0)))
 
 (defn step [f jac {:keys [t0 u0 f0] :as ode0} tolerance u-scale]
-  (let [safety       1.2
-        errmin       0.008
+  (let [safety       (double 1.1)
+        err-coeff    (double 1.333)                         ; 4 / 3
+        errmin       (double 0.008)                         ; (1/5)^3
         improve      (fn [{:keys [h-next] :as ode}]
                        (let [y (simple-step f jac ode)]
                          (if (c/finished? y)
                            (let [h-2              (* 0.5 h-next)
                                  u1               (:value y)
                                  f1               (f (+ t0 h-next) u1)
-                                 f-half-predictor (average f0 f1)
-                                 u-half-predictor (direct-step u0 f0 f-half-predictor h-2)
-                                 f-half-corrector (f (+ t0 h-2) u-half-predictor)
-                                 u-half-corrector (direct-step u0 f0 f-half-corrector h-2)
-                                 u1-refined       (direct-step u-half-corrector
-                                                                              f-half-corrector
-                                                                              f1
-                                                                              h-2)
-                                 delta            (* (* safety 0.75) (- u1 u1-refined))
+                                 f-half-estimate  (average f0 f1)
+                                 u-half-predictor (direct-step u0 f0 f-half-estimate h-2)
+                                 f-half-predictor (f (+ t0 h-2) u-half-predictor)
+                                 u-half-corrector (direct-step u0 f0 f-half-predictor h-2)
+                                 f-half-corrector (f (+ t0 h-2) u-half-corrector)
+                                 u1-predictor     (direct-step u-half-corrector f-half-corrector f1 h-2)
+                                 f1-predictor     (f (+ t0 h-next) u1-predictor)
+                                 u1-corrector     (direct-step u-half-corrector f-half-corrector f1-predictor h-2)
+                                 delta            (* (* safety err-coeff) (- u1 u1-corrector))
                                  err              (/ (emax (emap (fn [x y] (abs (/ x y))) delta u-scale)) tolerance)]
                              (cond (< err errmin) (ode-update ode
                                                               :h-did h-next

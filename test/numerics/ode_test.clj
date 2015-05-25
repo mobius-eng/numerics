@@ -70,4 +70,4 @@
   (expect (== (ecount times) (ecount y-scalar-sol)))
   (println y-scalar-sol)
   (println exact-sol)
-  (expect (< (distance y-scalar-sol exact-sol) (* 1.0e-6 (length exact-sol)))))
+  (expect (< (emax (- y-scalar-sol exact-sol)) (* 1.0e-8 (emax exact-sol)))))
