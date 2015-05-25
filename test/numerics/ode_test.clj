@@ -51,14 +51,14 @@
   (expect (> (:h-did y) 0.0))
   (expect (< (abs (- (Math/exp (- (:h-did y))) (:u1 y))) 1.0e-7)))
 
-(let [times        (inclusive-range 0.0 0.1 1.0)
+(let [times        (linspace 0.0 0.1 1.0)
       y-scalar-sol (ode-solve f-scalar-linear 0.0 1.0 times)
       exact-sol    (emap #(Math/exp (- %)) times)]
   (expect (== (ecount times) 11))
   (expect (== (ecount times) (ecount y-scalar-sol)))
   (expect (< (distance y-scalar-sol exact-sol) 1.0e-6)))
 
-(let [times        (inclusive-range 0.0 0.1 1.0)
+(let [times        (linspace 0.0 0.1 1.0)
       y-scalar-sol (ode-solve f-scalar-linear
                               0.0
                               1.0

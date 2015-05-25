@@ -42,9 +42,9 @@
             (== i n) result
             :else (recur (f result i (coll i)) (inc i))))))
 
-(defn inclusive-range
+(defn linspace
   "Like range but: (i) makes a core.matrix vector; (ii) includes the last point if possible"
-  ([start end] (inclusive-range start 1 end))
+  ([start end] (linspace start 1 end))
   ([start step end]
     (let [n (quot (+ step (- end start)) step)]
       (compute-matrix [n] #(+ start (* % step))))))
