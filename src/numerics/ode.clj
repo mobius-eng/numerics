@@ -59,6 +59,16 @@
   (< (num- t-target (num+ (:t0 ode) (:h-next ode))) 0.0))
 
 (defn ode-solve
+  "ODE solution: Du(t) = f(t,u(t)) with u(t0)=u0. Arguments:
+  f                          : is function f(t,u)
+  t0, u0                     : initial value
+  t-out                      : is a vector of times on which to produce output
+  method (optional)          : method to be used, falls to rk45ck if not provided
+  local-tolerance (optional) : precision on the local step
+  u-scale (optional)         : scale-factors for the solution to help to estimate
+                               the error correctly
+  Returns a vector of values of u on t-out with the first value of u0 (i.e. it prepends
+  t-out with t0 if necessary)"
   ([f t0 u0 t-out]
     (ode-solve f t0 u0 t-out rk45ck))
   ([f t0 u0 t-out method]

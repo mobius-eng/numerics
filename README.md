@@ -1,6 +1,7 @@
 # numerics
 
-Numerical analysis in Clojure.
+Numerical analysis in Clojure. The library's main focus is on small size problems: with
+vector sizes not larger than 100.
 
 ## Motivation
 
@@ -38,18 +39,22 @@ time of writing its development seemed to be stalled).
 + ODE: so far in a rudimentary form:
     - Classic fixed step Runge-Kutta of 4th order.
     - Variable step embedded Runge-Kutta of 4-5th order with Cash-Karp coefficients.
+    - Midpoint method: extension to Bulirsch-Stoer is coming.
+    - Crank-Nicolson: 2nd order implicit method with step control
 
 ## Nearest plans
 
-+ ODE: add Runge-Kutta 2nd order implicit method (Crank-Nicolson).
-+ ODE: add drivers
-+ ODE: add Bulirsch-Stoer method
-+ ODE: add methods for stiff problems
++ ODE: add Bulirsch-Stoer method.
++ ODE: add methods for stiff problems.
 + Add integration module: Simpson method and Gaussian quadratures.
++ Conditional numbers and eigenvalues-eigenvectors for matrices.
++ Optimisation: simulated annealing method.
 
-## Status: not ready yet
+## Status: not ready yet, proceed with caution
 
-This is not even alpha release yet. The test suit is (very) incomplete.
+This is not even alpha release yet. The test suite is (very) incomplete.
+API may change without version change at least until the project matures enough to reach
+version 0.0.5!
 
 ## License
 
